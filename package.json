@@ -1,0 +1,36 @@
+{
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/app": "latest",
+    "@capacitor/camera": "latest",
+    "@capacitor/core": "latest",
+    "@capacitor/geolocation": "latest",
+    "@capacitor/local-notifications": "latest",
+    "@capacitor/preferences": "latest",
+    "@capacitor/push-notifications": "latest",
+    "@capacitor/status-bar": "latest",
+    "@vitejs/plugin-react": "latest",
+    "firebase": "latest",
+    "idb": "latest",
+    "jspdf": "latest",
+    "leaflet": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-leaflet": "latest"
+  },
+  "devDependencies": {
+    "@types/leaflet": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "@capacitor/cli": "latest"
+  }
+}

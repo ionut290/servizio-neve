@@ -1,0 +1,10 @@
+{
+  "name": "Servizio Neve",
+  "short_name": "Neve",
+  "description": "App offline per operatori di sgombero neve con GPS, mappa e report.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#e0f2fe",
+  "theme_color": "#0284c7",
+  "icons": []
+}
