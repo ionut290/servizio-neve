@@ -1,0 +1,12 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function userDoc() { return firestore.get(/databases/(default)/documents/utenti/$(request.auth.uid)); }
+    function enabled() { return signedIn() && userDoc().data.abilitato == true; }
+    match /fotoNeve/{percorsoId}/{uid}/{fileName} {
+      allow read: if enabled() && (userDoc().data.ruolo == 'admin' || uid == request.auth.uid || percorsoId in userDoc().data.percorsiAbilitati);
+      allow write: if enabled() && uid == request.auth.uid && percorsoId in userDoc().data.percorsiAbilitati;
+    }
+  }
+}
