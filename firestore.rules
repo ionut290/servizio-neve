@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userDoc(uid) { return get(/databases/$(database)/documents/utenti/$(uid)); }
+    function isAdmin() { return signedIn() && userDoc(request.auth.uid).data.ruolo == 'admin'; }
+    function enabled() { return signedIn() && userDoc(request.auth.uid).data.abilitato == true; }
+    function assigned(routeId) { return enabled() && routeId in userDoc(request.auth.uid).data.percorsiAbilitati; }
+
+    match /utenti/{uid} {
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.ruolo == 'operatore'
+        && request.resource.data.abilitato == false;
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow update, delete: if isAdmin() || (signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ultimoAccesso']));
+    }
+
+    match /percorsiNeve/{percorsoId} {
+      allow read: if isAdmin() || assigned(percorsoId);
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (assigned(percorsoId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['strade', 'stato']));
+    }
+
+    match /turniNeve/{turnoId} {
+      allow read: if isAdmin() || (enabled() && resource.data.uidOperatore == request.auth.uid);
+      allow create: if enabled()
+        && request.resource.data.uidOperatore == request.auth.uid
+        && assigned(request.resource.data.percorsoId);
+      allow update: if enabled()
+        && resource.data.uidOperatore == request.auth.uid
+        && assigned(resource.data.percorsoId);
+      allow delete: if isAdmin();
+
+      match /gps/{gpsId} {
+        allow read: if isAdmin() || (enabled() && get(/databases/$(database)/documents/turniNeve/$(turnoId)).data.uidOperatore == request.auth.uid);
+        allow create: if enabled()
+          && get(/databases/$(database)/documents/turniNeve/$(turnoId)).data.uidOperatore == request.auth.uid
+          && assigned(get(/databases/$(database)/documents/turniNeve/$(turnoId)).data.percorsoId);
+        allow update, delete: if false;
+      }
+    }
+
+    match /cambiStatoStrade/{changeId} {
+      allow read: if isAdmin() || (enabled() && resource.data.uidOperatore == request.auth.uid);
+      allow create: if enabled()
+        && request.resource.data.uidOperatore == request.auth.uid
+        && assigned(request.resource.data.percorsoId);
+      allow update, delete: if isAdmin();
+    }
+
+    match /fotoNeve/{photoId} {
+      allow read: if isAdmin() || (enabled() && resource.data.uidOperatore == request.auth.uid);
+      allow create: if enabled()
+        && request.resource.data.uidOperatore == request.auth.uid
+        && assigned(request.resource.data.percorsoId);
+      allow update, delete: if isAdmin();
+    }
+  }
+}
